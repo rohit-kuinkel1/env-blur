@@ -48,7 +48,7 @@ export class MaskingConfig {
   private config: vscode.WorkspaceConfiguration;
 
   /**
-   * Initializes an instance of MaskingConfig with the current workspace configuration.
+   * Initializes a new instance of MaskingConfig with the current workspace configuration.
    * Loads the extension configuration using the var EXTENSION_NAME.
    */
   constructor() {
