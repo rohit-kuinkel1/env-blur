@@ -172,9 +172,9 @@ export class EnvFileMasker implements vscode.Disposable {
 
   private generateMask(value: string): string {
     const maskChar = this.config.getMaskingCharacter();
-    const strategy = this.config.getMaskingLength();
+    const strategy = this.config.getMaskingLengthStrategy();
 
-    if (strategy === "fixed") {
+    if (strategy === "fixedLength") {
       return maskChar.repeat(this.config.getFixedMaskLength());
     } else {
       return maskChar.repeat(value.length);
