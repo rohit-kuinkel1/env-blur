@@ -31,8 +31,9 @@ interface RevealedValue {
 }
 
 export class EnvFileMasker implements vscode.Disposable {
-  private maskDecoration: vscode.TextEditorDecorationType;
-  private revealDecoration: vscode.TextEditorDecorationType;
+  //the following errors are just TS errors, hence the !
+  private maskDecoration!: vscode.TextEditorDecorationType;
+  private revealDecoration!: vscode.TextEditorDecorationType;
 
   private parser: EnvFileParser;
   private config: MaskingConfig;
