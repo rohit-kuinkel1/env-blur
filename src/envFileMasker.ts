@@ -39,7 +39,7 @@ export class EnvFileMasker implements vscode.Disposable {
   private config: MaskingConfig;
 
   private revealedValues: Map<string, Map<number, RevealedValue>>;
-  private enabled: boolean = true;
+  private isExtensionEnabled: boolean = true;
 
   /**
    * Initializes a new instance of EnvFileMasker.
@@ -127,8 +127,8 @@ export class EnvFileMasker implements vscode.Disposable {
 
   /**
    * Handles text editor selection changes (including cursor movements and clicks).
-   * Detects when users click on masked environment variable values and toggles
-   * their visibility. Only processes single-cursor selections in supported files.
+   * Only toggles visibility when clicking exactly on environment variable values.
+   * Ignores clicks on keys, equals signs, or empty space.
    *
    * @param {vscode.TextEditorSelectionChangeEvent} event - The selection change event containing editor and selection info
    */
@@ -136,7 +136,7 @@ export class EnvFileMasker implements vscode.Disposable {
     event: vscode.TextEditorSelectionChangeEvent
   ): void {
     const editor = event.textEditor;
-    if (!this.shouldProcessFile(editor.document) || !this.enabled) {
+    if (!this.shouldProcessFile(editor.document) || !this.isExtensionEnabled) {
       return;
     }
 
@@ -199,7 +199,7 @@ export class EnvFileMasker implements vscode.Disposable {
    * @param {vscode.TextEditor} editor - The text editor to process
    */
   private processEditor(editor: vscode.TextEditor): void {
-    if (!this.enabled) {
+    if (!this.isExtensionEnabled) {
       return;
     }
 
@@ -298,9 +298,8 @@ export class EnvFileMasker implements vscode.Disposable {
 
   /**
    * Handles user click events on the text editor.
-   * Determines if the click was on an environment variable value and toggles
-   * its visibility accordingly. If the click was outside any values, hides
-   * all currently revealed values for the file.
+   * ONLY toggles visibility when clicking exactly on environment variable values.
+   * Ignores clicks anywhere else (keys, equals signs, empty space).
    *
    * @param {vscode.TextEditor} editor - The editor where the click occurred
    * @param {vscode.Position} position - The position of the click in the editor
@@ -312,20 +311,19 @@ export class EnvFileMasker implements vscode.Disposable {
     const envVariables = this.parser.parseDocument(editor.document);
     const uri = editor.document.uri.toString();
 
-    //find if the last click was on a value
+    // Only find if the click was exactly on a value (not key, not equals, not empty space)
     const clickedVariable = envVariables.find(
       (envVar) =>
         envVar.line === position.line &&
         position.character >= envVar.valueStart &&
-        position.character <= envVar.valueEnd
+        position.character < envVar.valueEnd // Changed <= to < for precise boundary
     );
 
+    // Only toggle if clicked exactly on a value, otherwise do nothing
     if (clickedVariable) {
       this.toggleValueVisibility(editor, clickedVariable, uri);
-    } else {
-      //if the click was outside then we hide all currently revealed values for this file
-      this.hideAllValuesForFile(editor, uri);
     }
+    // Removed the else clause - clicking elsewhere does nothing
   }
 
   /**
@@ -408,9 +406,9 @@ export class EnvFileMasker implements vscode.Disposable {
    * Provides user feedback through VS Code information messages.
    */
   public toggleMasking(): void {
-    this.enabled = !this.enabled;
+    this.isExtensionEnabled = !this.isExtensionEnabled;
 
-    if (this.enabled) {
+    if (this.isExtensionEnabled) {
       this.processAllOpenEditors();
       vscode.window.showInformationMessage("Environment file masking enabled");
     } else {

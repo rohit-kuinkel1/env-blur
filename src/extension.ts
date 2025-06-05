@@ -48,7 +48,7 @@ let envMasker: EnvFileMasker;
  * @example
  *  Called automatically by VS Code when extension activates
  *  User can then access commands via:
- *  - Command Palette: "env-blur: Toggle Masking"
+ *  - Command Palette: "env-blur: Toggle Masking feature on/off"
  *  - Command Palette: "env-blur: Reveal All Values"
  *  - Command Palette: "env-blur: Mask All Values"
  */

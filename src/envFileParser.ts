@@ -137,7 +137,7 @@ export class EnvFileParser {
     const keyStartIndex = originalText.indexOf(key);
     const equalsInOriginal = originalText.indexOf("=", keyStartIndex);
     const valueStartIndex = equalsInOriginal + 1;
-    const valueEndIndex = originalText.length;
+    const valueEndIndex = valueStartIndex + value.length;
 
     return {
       line: lineNumber,

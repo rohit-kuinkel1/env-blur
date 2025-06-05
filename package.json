@@ -18,7 +18,7 @@
     "commands": [
       {
         "command": "envMasker.toggleMasking",
-        "title": "Toggle Masking",
+        "title": "Toggle Masking feature on/off",
         "category": "env-blur"
       },
       {
