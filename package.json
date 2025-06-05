@@ -9,15 +9,84 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:plaintext",
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "env-blur.helloWorld",
-        "title": "Hello World"
+        "command": "envMasker.toggleMasking",
+        "title": "Toggle Masking",
+        "category": "env-blur"
+      },
+      {
+        "command": "envMasker.revealAll",
+        "title": "Reveal All Values",
+        "category": "env-blur"
+      },
+      {
+        "command": "envMasker.maskAll",
+        "title": "Mask All Values",
+        "category": "env-blur"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "env-blur",
+      "properties": {
+        "env-blur.eb_maskingCharacter": {
+          "type": "string",
+          "default": "•",
+          "description": "Character that is used for masking sensitive values"
+        },
+        "env-blur.eb_maskingLengthStrategy": {
+          "type": "string",
+          "enum": [
+            "eb_fixedLength",
+            "eb_proportionalLength"
+          ],
+          "default": "eb_proportionalLength",
+          "description": "Strategy for determining mask length"
+        },
+        "env-blur.eb_fixedMaskLength": {
+          "type": "number",
+          "default": 20,
+          "minimum": 5,
+          "maximum": 100,
+          "description": "Fixed length for masking when using fixed strategy"
+        },
+        "env-blur.eb_autoHideDelay": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Auto-hide delay in milliseconds (0 = no auto-hide)"
+        },
+        "env-blur.eb_blacklistedFiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "File patterns to exclude from masking"
+        },
+        "env-blur.eb_enabledFilePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            ".env",
+            ".env.local",
+            ".env.development",
+            ".env.production",
+            ".env.test"
+          ],
+          "description": "File patterns where masking should be enabled"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -30,12 +99,12 @@
   "devDependencies": {
     "@types/vscode": "^1.100.0",
     "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
+    "@types/node": "22.15.30",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
     "eslint": "^9.25.1",
     "typescript": "^5.8.3",
-    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-cli": "0.0.11",
     "@vscode/test-electron": "^2.5.2"
   }
 }

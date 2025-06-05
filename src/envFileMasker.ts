@@ -65,10 +65,12 @@ export class EnvFileMasker implements vscode.Disposable {
    * These decorations are applied dynamically based on user interactions.
    */
   private createDecorations(): void {
-    //decoration/style for masked values
+    //decoration/style for masked values; hides original text by making it transparent
     this.maskDecoration = vscode.window.createTextEditorDecorationType({
       opacity: "1",
       cursor: "pointer",
+      color: "transparent",
+      letterSpacing: "0px",
     });
 
     //decoration/style for revealed values
@@ -252,7 +254,7 @@ export class EnvFileMasker implements vscode.Disposable {
           ),
         });
       } else {
-        //show the masked value since the real value is not revealed
+        //mask the value by making original text invisible and showing mask
         const maskText = this.generateMask(envVar.value);
         maskDecorations.push({
           range: new vscode.Range(
@@ -262,7 +264,7 @@ export class EnvFileMasker implements vscode.Disposable {
             envVar.valueEnd
           ),
           renderOptions: {
-            after: {
+            before: {
               contentText: maskText,
               color: new vscode.ThemeColor("editor.foreground"),
             },
