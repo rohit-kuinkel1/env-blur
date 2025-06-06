@@ -10,8 +10,10 @@
     "Other"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onLanguage:plaintext",
-    "onStartupFinished"
+    "onLanguage:dotenv",
+    "workspaceContains:.env"
   ],
   "main": "./out/extension.js",
   "contributes": {
