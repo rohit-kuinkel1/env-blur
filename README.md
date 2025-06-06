@@ -1,6 +1,6 @@
 # env-mask
 
-A VS Code extension (unpublished) that automatically masks sensitive values in environment files to protect secrets from shoulder surfing and accidental exposure.
+A VS Code extension that automatically masks sensitive values in environment files to protect secrets from shoulder surfing and accidental exposure.
 
 ![Masked Values](images/masked.png)
 _Environment variables with values safely masked_
@@ -27,7 +27,7 @@ This somewhat prevents accidental flashes of API keys, database passwords, and o
 - **Blacklist Support**: Exclude specific files or patterns from masking
 - **Real-time**: Instantly applies to newly opened files
 
-## Installation (still unpublished)
+## Installation
 
 1. Open VS Code
 2. Go to Extensions (Ctrl+Shift+X)
