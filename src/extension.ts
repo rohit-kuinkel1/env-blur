@@ -1,18 +1,17 @@
 /**
  * VS Code Extension Entry Point for env-blur
  *
- * This file serves as the main entry point for the env-blur VS Code extension.
+ * This file serves as the main entry point for env-blur.
  * It handles the extension lifecycle, including activation, deactivation, and
  * registration of commands and event listeners.
  *
- * Key responsibilities:
+ * Takes care of things like:
  * - Initializing the EnvFileMasker when the extension activates
  * - Registering VS Code commands for user interactions (toggle, reveal, mask)
  * - Setting up event listeners for editor changes, document lifecycle, and configuration updates
  * - Managing the extension's disposable resources and cleanup
  * - Providing the bridge between VS Code's extension API and the masking functionality
  *
- * The extension follows VS Code's standard activation pattern:
  * 1. activate() is called when the extension loads
  * 2. Commands and event listeners are registered
  * 3. The main functionality (EnvFileMasker) is initialized
@@ -31,8 +30,8 @@ import { EnvFileMasker } from "./envFileMasker";
 let envMasker: EnvFileMasker;
 
 /**
- * Activates the env-blur extension when VS Code loads it.
- * This function is the main entry point called by VS Code when the extension
+ * Activates the extension when VS Code loads it.
+ * It is the main entry point called by VS Code when the extension
  * is activated. It initializes all components, registers commands, sets up
  * event listeners, and prepares the extension for use.
  *
@@ -183,7 +182,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 /**
- * Deactivates the env-blur extension when VS Code unloads it.
+ * Deactivates the extension when VS Code unloads it.
  * This function is called by VS Code when the extension is being disabled,
  * uninstalled, or when VS Code is shutting down. It ensures proper cleanup
  * of all resources to prevent memory leaks and system issues.

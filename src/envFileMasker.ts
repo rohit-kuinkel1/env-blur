@@ -160,21 +160,11 @@ export class EnvFileMasker implements vscode.Disposable {
   private shouldProcessFile(document: vscode.TextDocument): boolean {
     const fileName = this.getFileName(document);
 
-    //check if the file has been blacklisted
     if (this.config.isFileBlacklisted(document.uri.fsPath)) {
       return false;
     }
 
-    //check if file matches enabled patterns
-    return this.config.getEnabledFilePatterns().some((pattern) => {
-      if (pattern.includes("*") || pattern.includes("?")) {
-        const regex = new RegExp(
-          "^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$"
-        );
-        return regex.test(fileName);
-      }
-      return fileName === pattern;
-    });
+    return this.config.matchesEnabledPattern(fileName);
   }
 
   /**
@@ -198,7 +188,7 @@ export class EnvFileMasker implements vscode.Disposable {
    *
    * @param {vscode.TextEditor} editor - The text editor to process
    */
-  private processEditor(editor: vscode.TextEditor): void {
+  public processEditor(editor: vscode.TextEditor): void {
     if (!this.isExtensionEnabled) {
       return;
     }
@@ -311,19 +301,18 @@ export class EnvFileMasker implements vscode.Disposable {
     const envVariables = this.parser.parseDocument(editor.document);
     const uri = editor.document.uri.toString();
 
-    // Only find if the click was exactly on a value (not key, not equals, not empty space)
+    //find if the click was exactly on a value (from start to end of value content)
     const clickedVariable = envVariables.find(
       (envVar) =>
         envVar.line === position.line &&
         position.character >= envVar.valueStart &&
-        position.character < envVar.valueEnd // Changed <= to < for precise boundary
+        position.character <= envVar.valueEnd
     );
 
-    // Only toggle if clicked exactly on a value, otherwise do nothing
+    //toggle only if clicked exactly on a value, otherwise do nothing
     if (clickedVariable) {
       this.toggleValueVisibility(editor, clickedVariable, uri);
     }
-    // Removed the else clause - clicking elsewhere does nothing
   }
 
   /**

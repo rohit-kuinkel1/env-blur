@@ -46,7 +46,7 @@
             "eb_fixedLength",
             "eb_proportionalLength"
           ],
-          "default": "eb_proportionalLength",
+          "default": "eb_fixedLength",
           "description": "Strategy for determining mask length"
         },
         "env-blur.eb_fixedMaskLength": {
@@ -58,7 +58,7 @@
         },
         "env-blur.eb_autoHideDelay": {
           "type": "number",
-          "default": 0,
+          "default": 5000,
           "minimum": 0,
           "maximum": 10000,
           "description": "Auto-hide delay in milliseconds (0 = no auto-hide)"

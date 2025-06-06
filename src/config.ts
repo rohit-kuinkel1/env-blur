@@ -28,7 +28,7 @@ import * as path from "path";
  * @example
  * Original value: "my-secret-api-key-12345"
  *
- * With "fixed" strategy (say, fixedMaskLength = 8):
+ * With "fixed" strategy (say, masking length is 8):
  * Shows: "••••••••" (always 8 characters regardless of original length)
  *
  * With "proportional" strategy:
@@ -38,8 +38,14 @@ export type MaskingLengthStrategy = "eb_fixedLength" | "eb_proportionalLength";
 
 export class MaskingConfig {
   private static readonly EXTENSION_NAME = "env-blur";
-  private static readonly DEFAULT_MASKING_LENGTH = 20;
-  private static readonly DEFAULT_AUTO_HIDE_DELAY = 0;
+  private static readonly DEFAULT_MASKING_LENGTH = 8;
+  private static readonly DEFAULT_AUTO_HIDE_DELAY_MS = 0;
+  private static readonly DEFAULT_MAX_AUTO_HIDE_DELAY_MS = 10000;
+  private static readonly MANDATORY_FILEPATTERN = ".env";
+
+  private enabledPatternCache: Map<string, RegExp> = new Map();
+  private blacklistCache: Map<string, RegExp> = new Map();
+
   /**
    * Holds the stored configuration for the extension.
    * The configuration is fetched from the vscode workspace using
@@ -55,6 +61,35 @@ export class MaskingConfig {
     this.config = vscode.workspace.getConfiguration(
       MaskingConfig.EXTENSION_NAME
     );
+
+    this.buildRegexCaches();
+  }
+
+  /**
+   * Build and cache all regex patterns once to reduce
+   * runtime overhead
+   */
+  private buildRegexCaches(): void {
+    this.enabledPatternCache.clear();
+    this.blacklistCache.clear();
+
+    this.getEnabledFilePatterns().forEach((pattern) => {
+      if (pattern.includes("*") || pattern.includes("?")) {
+        const regex = new RegExp(
+          "^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$"
+        );
+        this.enabledPatternCache.set(pattern, regex);
+      }
+    });
+
+    this.getBlacklistedFiles().forEach((pattern) => {
+      if (pattern.includes("*") || pattern.includes("?")) {
+        const regex = new RegExp(
+          "^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$"
+        );
+        this.blacklistCache.set(pattern, regex);
+      }
+    });
   }
 
   /**
@@ -65,6 +100,8 @@ export class MaskingConfig {
     this.config = vscode.workspace.getConfiguration(
       MaskingConfig.EXTENSION_NAME
     );
+
+    this.buildRegexCaches();
   }
 
   /**
@@ -90,7 +127,7 @@ export class MaskingConfig {
   public getMaskingLengthStrategy(): MaskingLengthStrategy {
     return this.config.get<MaskingLengthStrategy>(
       "eb_maskingLengthStrategy",
-      "eb_proportionalLength"
+      "eb_fixedLength"
     );
   }
 
@@ -119,22 +156,28 @@ export class MaskingConfig {
   /**
    * Gets the delay in milliseconds before automatically hiding revealed values.
    * A value of 0 means no auto-hide. Validates range is 0-10000ms (0-10sec).
+   * In case of an invalid delay value, it is assumed that default hiding was wanted
+   * so the DEFAULT_MAX_AUTO_HIDE_DELAY_MS is returned.
    * @returns {number} Auto-hide delay in milliseconds, 0 for no auto-hide
    */
   public getAutoHideDelay(): number {
     const delay = this.config.get<number>(
       "eb_autoHideDelay",
-      MaskingConfig.DEFAULT_AUTO_HIDE_DELAY
+      MaskingConfig.DEFAULT_AUTO_HIDE_DELAY_MS
     );
 
-    if (isNaN(delay) || delay < 0 || delay > 10000) {
-      console.warn(
-        `Invalid auto-hide delay ${delay}, using default ${MaskingConfig.DEFAULT_AUTO_HIDE_DELAY}`
-      );
-      return MaskingConfig.DEFAULT_AUTO_HIDE_DELAY;
+    if (isNaN(delay) || delay > MaskingConfig.DEFAULT_MAX_AUTO_HIDE_DELAY_MS) {
+      return MaskingConfig.DEFAULT_MAX_AUTO_HIDE_DELAY_MS;
     }
 
-    //if everything was legit, return the stored value
+    if (delay < 0) {
+      console.warn(
+        `Invalid auto-hide delay ${delay}, using default ${MaskingConfig.DEFAULT_AUTO_HIDE_DELAY_MS}`
+      );
+      return MaskingConfig.DEFAULT_AUTO_HIDE_DELAY_MS;
+    }
+
+    //if everything is valid and within range, return the value
     return delay;
   }
 
@@ -161,8 +204,16 @@ export class MaskingConfig {
     ]);
 
     //ensure that we at least have .env because thats the one thats mostly used
-    if (patterns.length === 0 || !patterns.includes(".env")) {
-      patterns.push(".env");
+    //if you want .env files not to be masked; just disable the extension
+    if (
+      !patterns ||
+      patterns.length === 0 ||
+      !patterns.includes(MaskingConfig.MANDATORY_FILEPATTERN)
+    ) {
+      console.warn(
+        `Found no file patterns to match, using default pushing '${MaskingConfig.MANDATORY_FILEPATTERN}' explicitly`
+      );
+      patterns.push(MaskingConfig.MANDATORY_FILEPATTERN);
     }
 
     return patterns;
@@ -172,33 +223,66 @@ export class MaskingConfig {
    * Checks if a given file path should be excluded from masking based on blacklist patterns
    * Supports wildcard patterns (* and ?) for flexible matching
    * @param {string} filePath - The full file path to check
-   * @returns {boolean} True if the file is blacklisted and should not be masked
+   * @returns {boolean} True if the file is blacklisted and SHOULD NOT be masked
    */
   public isFileBlacklisted(filePath: string): boolean {
+    if (!filePath || filePath.trim().length === 0) {
+      return false;
+    }
     const blacklistedFiles = this.getBlacklistedFiles();
-
-    if (blacklistedFiles.length === 0) {
+    if (!blacklistedFiles || blacklistedFiles.length === 0) {
       return false;
     }
 
     const fileName = path.basename(filePath);
     const normalizedPath = filePath.replace(/\\/g, "/");
 
-    return blacklistedFiles.some((pattern) => {
+    for (const pattern of blacklistedFiles) {
       if (pattern.includes("*") || pattern.includes("?")) {
-        const regex = new RegExp(
-          "^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$"
-        );
-        return regex.test(fileName) || regex.test(normalizedPath);
+        const regex = this.blacklistCache.get(pattern);
+        if (regex && (regex.test(fileName) || regex.test(normalizedPath))) {
+          return true;
+        }
+      } else {
+        //exact match for filename or full path
+        if (
+          fileName === pattern ||
+          normalizedPath.endsWith(pattern) ||
+          normalizedPath === pattern
+        ) {
+          return true;
+        }
       }
+    }
 
-      //exact match for filename or full path
-      return (
-        fileName === pattern ||
-        normalizedPath.endsWith(pattern) ||
-        normalizedPath === pattern
-      );
-    });
+    return false;
+  }
+
+  /**
+   * File pattern matching using cached regexes.
+   * Checks if the given @param fileName matches our
+   * regex pattern for files that need to be considered.
+   *
+   * @param {string} fileName - The full file path to check
+   * @returns {boolean} True if the file is NOT blacklisted and SHOULD be masked
+   */
+  public matchesEnabledPattern(fileName: string): boolean {
+    const enabledPatterns = this.getEnabledFilePatterns();
+
+    for (const pattern of enabledPatterns) {
+      if (pattern.includes("*") || pattern.includes("?")) {
+        const regex = this.enabledPatternCache.get(pattern);
+        if (regex && regex.test(fileName)) {
+          return true;
+        }
+      } else {
+        if (fileName === pattern) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
