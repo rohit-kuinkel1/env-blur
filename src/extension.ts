@@ -1,7 +1,7 @@
 /**
- * VS Code Extension Entry Point for env-blur
+ * VS Code Extension Entry Point for env-mask
  *
- * This file serves as the main entry point for env-blur.
+ * This file serves as the main entry point for env-mask.
  * It handles the extension lifecycle, including activation, deactivation, and
  * registration of commands and event listeners.
  *
@@ -47,9 +47,9 @@ let envMasker: EnvFileMasker;
  * @example
  *  Called automatically by VS Code when extension activates
  *  User can then access commands via:
- *  - Command Palette: "env-blur: Toggle Masking feature on/off"
- *  - Command Palette: "env-blur: Reveal All Values"
- *  - Command Palette: "env-blur: Mask All Values"
+ *  - Command Palette: "env-mask: Toggle Masking feature on/off"
+ *  - Command Palette: "env-mask: Reveal All Values"
+ *  - Command Palette: "env-mask: Mask All Values"
  */
 export function activate(context: vscode.ExtensionContext) {
   console.log("Environment File Masker extension is now active");
@@ -149,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   /**
    * Event Listener: onDidChangeConfiguration
-   * Monitors changes to VS Code settings that affect the env-blur extension.
+   * Monitors changes to VS Code settings that affect the env-mask extension.
    * When users modify masking settings (character, length, patterns, etc.),
    * automatically reloads the configuration and reapplies masking with the
    * new settings to all open environment files.

@@ -1,5 +1,5 @@
 /**
- * Configuration management for the env-blur VS Code extension.
+ * Configuration management for the env-mask VS Code extension.
  *
  * This file contains the MaskingConfig class which handles all configuration-related
  * functionality for the extension. It manages user settings like:
@@ -37,7 +37,7 @@ import * as path from "path";
 export type MaskingLengthStrategy = "eb_fixedLength" | "eb_proportionalLength";
 
 export class MaskingConfig {
-  private static readonly EXTENSION_NAME = "env-blur";
+  private static readonly EXTENSION_NAME = "env-mask";
   private static readonly DEFAULT_MASKING_LENGTH = 8;
   private static readonly DEFAULT_AUTO_HIDE_DELAY_MS = 0;
   private static readonly DEFAULT_MAX_AUTO_HIDE_DELAY_MS = 10000;
@@ -133,7 +133,7 @@ export class MaskingConfig {
 
   /**
    * Gets the fixed length for masking when using "fixed" masking strategy
-   * Validates the length is between 5-100 characters, defaults to 20 if invalid
+   * Validates the length is between 5-100 characters, defaults to value for DEFAULT_MASKING_LENGTH if invalid
    * @returns {number} The number of characters to use for fixed-length masking
    */
   public getFixedMaskLength(): number {

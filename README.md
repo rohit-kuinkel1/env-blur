@@ -1,4 +1,4 @@
-# env-blur
+# env-mask
 
 A VS Code extension (unpublished) that automatically masks sensitive values in environment files to protect secrets from shoulder surfing and accidental exposure.
 
@@ -10,7 +10,7 @@ _Click on any masked value to temporarily reveal it_
 
 ## What it does
 
-**env-blur** automatically detects and masks sensitive values in `.env` files, replacing them with configurable masking characters (like `••••••••••`).
+**env-mask** automatically detects and masks sensitive values in `.env` files, replacing them with configurable masking characters (like `••••••••••`).
 <br>
 This somewhat prevents accidental flashes of API keys, database passwords, and other secrets for example when:
 
@@ -31,13 +31,13 @@ This somewhat prevents accidental flashes of API keys, database passwords, and o
 
 1. Open VS Code
 2. Go to Extensions (Ctrl+Shift+X)
-3. Search for "env-blur"
+3. Search for "env-mask"
 4. Click Install
 
 Or install from the command line:
 
 ```bash
-code --install-extension env-blur
+code --install-extension env-mask
 ```
 
 ## Usage
@@ -47,9 +47,9 @@ code --install-extension env-blur
 1. **Open any `.env` file** - values are automatically masked
 2. **Click towards the tail of a masked value** to reveal it temporarily
 3. **Use Command Palette** (Ctrl+Shift+P) for additional commands:
-   - `env-blur: Toggle Masking feature on/off`
-   - `env-blur: Reveal All Values`
-   - `env-blur: Mask All Values`
+   - `env-mask: Toggle Masking feature on/off`
+   - `env-mask: Reveal All Values`
+   - `env-mask: Mask All Values`
 
 ### Supported File Patterns
 
@@ -63,12 +63,12 @@ By default, the extension works with:
 
 ## Configuration
 
-Access settings via File → Preferences → Settings, then search for "env-blur":
+Access settings via File → Preferences → Settings, then search for "env-mask":
 
 ### Masking Character
 
 ```json
-"env-blur.eb_maskingCharacter": "•"
+"env-mask.eb_maskingCharacter": "•"
 ```
 
 Character used for masking (default: `•`)
@@ -76,7 +76,7 @@ Character used for masking (default: `•`)
 ### Masking Strategy
 
 ```json
-"env-blur.eb_maskingLengthStrategy": "eb_fixedLength"
+"env-mask.eb_maskingLengthStrategy": "eb_fixedLength"
 ```
 
 - `eb_fixedLength`: Use a fixed number of characters
@@ -85,7 +85,7 @@ Character used for masking (default: `•`)
 ### Fixed Mask Length
 
 ```json
-"env-blur.eb_fixedMaskLength": 8
+"env-mask.eb_fixedMaskLength": 8
 ```
 
 Number of masking characters when using fixed length strategy (5-100)
@@ -93,7 +93,7 @@ Number of masking characters when using fixed length strategy (5-100)
 ### Auto-Hide Delay (ms)
 
 ```json
-"env-blur.eb_autoHideDelay": 5000
+"env-mask.eb_autoHideDelay": 5000
 ```
 
 Milliseconds before auto-hiding revealed values (0 = no auto-hide, max: 10000)
@@ -101,7 +101,7 @@ Milliseconds before auto-hiding revealed values (0 = no auto-hide, max: 10000)
 ### File Patterns
 
 ```json
-"env-blur.eb_enabledFilePatterns": [
+"env-mask.eb_enabledFilePatterns": [
   ".env",
   ".env.local",
   ".env.development",
@@ -115,7 +115,7 @@ File patterns where masking should be enabled
 ### Blacklisted Files
 
 ```json
-"env-blur.eb_blacklistedFiles": [
+"env-mask.eb_blacklistedFiles": [
   "public.env",
   "*.example.env"
 ]
@@ -127,9 +127,9 @@ File patterns to exclude from masking (supports wildcards)
 
 | Command                                   | Description                         |
 | ----------------------------------------- | ----------------------------------- |
-| `env-blur: Toggle Masking feature on/off` | Enable/disable the entire extension |
-| `env-blur: Reveal All Values`             | Show all values in the current file |
-| `env-blur: Mask All Values`               | Hide all values in the current file |
+| `env-mask: Toggle Masking feature on/off` | Enable/disable the entire extension |
+| `env-mask: Reveal All Values`             | Show all values in the current file |
+| `env-mask: Mask All Values`               | Hide all values in the current file |
 
 The original file content is never modified - masking is purely visual through VS Code's decoration system.
 This also means that the extension has limitations that are addressed below.
